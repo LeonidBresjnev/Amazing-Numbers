@@ -1,0 +1,262 @@
+import java.util.Locale;
+import java.util.Scanner;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+
+
+
+
+class property {
+    long myval;
+    boolean[] theproperties = new boolean[12];
+
+    private boolean square(long x) {
+        return (((int)Math.sqrt(x)) == Math.sqrt(x));
+    }
+
+    private boolean sunny(long x) {
+        return (square(x+1));
+    }
+
+    private boolean palindromic(long a){
+        StringBuilder astr = new StringBuilder(String.valueOf(Long.toString(a)));
+        return Objects.equals(astr.toString(), astr.reverse().toString());
+    }
+
+    private static boolean jumping(long x) {
+        int digits = (int) Math.log10(x) + 1;
+        boolean jumping = true;
+        for (int i = 1; i < digits; i++) {
+            if (Math.abs((long) ((x / Math.pow(10, i)) % 10) - ((long) (x / Math.pow(10, i - 1)) % 10)) != 1) {
+                jumping = false;
+                break;
+            }
+        }
+        return jumping;
+    }
+
+    private static boolean happy(long x){
+        HashSet<Integer> myset = new HashSet<Integer>();
+        int digits;
+        int sum;
+        do {
+            digits=(int) Math.log10(x)+1;
+            sum=0;
+            for (int i=0;i<digits;i++){
+                sum += Math.pow((long) ((x /(long) Math.pow(10L,  i)) % 10L),2L);
+            }
+            if (sum == 1) {
+                return true;
+            }
+            x = sum;
+        } while (myset.add(sum));
+        return false;
+    }
+
+
+    private static boolean spy(long x){
+
+        long produkt = 1, sum = 0;
+        int digits = (int) Math.log10(x) ;
+        for (int i = 0; i <= digits; i++) {
+            produkt = produkt * (long) ((x/Math.pow(10,i)) % 10);
+            sum += (x/Math.pow(10,i)) % 10;
+            //  System.out.println("i=" + i + " produkt=" + produkt + " sum=" + sum);
+        }
+        return (sum == produkt);
+    }
+
+    void setproperties(long x){
+        this.myval = x;
+        theproperties[0] =(this.myval % 7 == 0 || this.myval % 10 == 7);
+        theproperties[1] =String.valueOf(myval).contains("0");
+        theproperties[2] = palindromic(myval);
+        theproperties[3]= this.myval>=100 && (myval % ((int) (myval / (Math.pow(10, (int) Math.log10(this.myval)))) * 10 + myval % 10) == 0);
+        theproperties[4] =spy(myval);
+        theproperties[5]=square(myval);
+        theproperties[6]=sunny(myval);
+        theproperties[7]=jumping(myval);
+        theproperties[8]=happy(myval);
+        theproperties[9]=!theproperties[8];
+        theproperties[10]=(myval % 2 == 0);
+        theproperties[11]=(myval % 2 == 1);
+    }
+    String[] names = new String[]{ "buzz","duck","palindromic","gapful","spy","square","sunny","jumping","happy","sad","even","odd"};
+
+    void printproperties(short format){
+        boolean first = true;
+        for (int i=0;i<12;i++){
+            if (format==1) {
+                if (i==0){
+                System.out.printf("Properties of %,d\n",myval);
+            }
+                System.out.println(String.format("%1$" + 12 + "s", names[i]).replace(' ', ' ') + ": " + theproperties[i]);
+            } else {
+                if (i==0){
+                    System.out.printf("%,d is", myval);
+                }
+               System.out.printf(  theproperties[i] ? (!first ? ", " : " ") + names[i]  : "",myval);
+                if (theproperties[i]) {first = false;}
+            }
+        }
+        System.out.println();
+    }
+}
+
+class main {
+
+    private static void printinstruction(){
+        System.out.println("Supported requests:\n- enter a natural number to know its properties;");
+        System.out.println("- enter two natural numbers to obtain the properties of the list:");
+        System.out.println("* the first parameter represents a starting number;");
+        System.out.println("* the second parameter shows how many consecutive numbers are to be printed;");
+        System.out.println("- two natural numbers and properties to search for;");
+        System.out.println("- a property preceded by minus must not be present in numbers;");
+        System.out.println("- separate the parameters with one space;");
+        System.out.println("- enter 0 to exit.");
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to Amazing Numbers!");
+        Scanner scanner = new Scanner(System.in);
+        String[] words;
+        printinstruction();
+        long a;
+        property theproperty = new property();
+        do {
+            System.out.println("Enter a request:");
+            words = scanner.nextLine().split(" ");
+            a = Long.parseLong(words[0]);
+            if (a<0){ System.out.println("The first parameter should be a natural number or zero.");}
+            else if (a > 0) {
+                if (words.length==1) {
+                    theproperty.setproperties( (long) a);
+                    theproperty.printproperties((short) 1);
+                } else if (words.length==2){
+                    long b;
+                    if (Long.parseLong(words[1])<=0) {
+                        System.out.println("The second parameter should be a natural number.");
+                    } else {
+                        for (int i=0; i<Long.parseLong(words[1]);i++) {
+                            b = a+i;
+                            theproperty.setproperties( (long) b);
+                            theproperty.printproperties((short) 2);
+                        }
+                    }
+                } else if (words.length>=3){
+                    long b = a;
+                    List<String> wrongs = new ArrayList<String>();
+                    for (int k=2;k<words.length;k++){
+                        words[k] = words[k].toUpperCase();
+                        if (!(words[k].equals("ODD")||words[k].equals("EVEN")||words[k].equals("JUMPING")||words[k].equals("GAPFUL")||words[k].equals("BUZZ")||words[k].equals("SPY")||words[k].equals("SQUARE")||words[k].equals("HAPPY")||words[k].equals("SAD")||words[k].equals("SUNNY")||words[k].equals("PALINDROMIC")||words[k].equals("DUCK")||
+                              words[k].equals("-ODD")||words[k].equals("-EVEN")||words[k].equals("-JUMPING")||words[k].equals("-GAPFUL")||words[k].equals("-BUZZ")||words[k].equals("-SPY")||words[k].equals("-SQUARE")||words[k].equals("-HAPPY")||words[k].equals("-SAD")||words[k].equals("-SUNNY")||words[k].equals("-PALINDROMIC")||words[k].equals("-DUCK"))
+                        ) {
+                            wrongs.add(words[k]);
+                        }
+                    }
+
+                    if (Long.parseLong(words[1])<=0) {
+                        System.out.println("second parameter should be a natural number");
+                    } else if (wrongs.size()>0){
+                        System.out.println("The " + ( (wrongs.size() == 1) ? "property " : "properties ") + (Arrays.toString(wrongs.toArray())) + ( (wrongs.size() == 1) ? " is" : " are") +" wrong.");
+                        System.out.println("Available properties: [BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING, HAPPY, SAD, EVEN, ODD]");
+                    }  else {
+                        boolean[] requests = new boolean[] {false,false,false,false,false,false,false,false,false,false,false,false};
+                        boolean[] minuses = new boolean[] {false,false,false,false,false,false,false,false,false,false,false,false};
+                        int count = 0;
+                        boolean printstuff ;
+                        for (int k=2;k<words.length;k++) {
+                            switch (words[k]) {
+                                case ("BUZZ"):requests[0] = true;
+                                    break;
+                                case ("DUCK"):requests[1] = true;
+                                    break;
+                                case ("PALINDROMIC"):requests[2] = true;
+                                    break;
+                                case ("GAPFUL"):requests[3] = true;
+                                    break;
+                                case ("SPY"):requests[4] = true;
+                                    break;
+                                case ("SQUARE"):requests[5] = true;
+                                    break;
+                                case ("SUNNY"):requests[6] = true;
+                                    break;
+                                case ("JUMPING"):requests[7] = true;
+                                    break;
+                                case ("HAPPY"):requests[8] = true;
+                                    break;
+                                case ("SAD"):requests[9] = true;
+                                    break;
+                                case ("EVEN"):requests[10] = true;
+                                    break;
+                                case ("ODD"):requests[11] = true;
+                                    break;
+                                case ("-BUZZ"):minuses[0] = true;
+                                    break;
+                                case ("-DUCK"):minuses[1] = true;
+                                    break;
+                                case ("-PALINDROMIC"):minuses[2] = true;
+                                    break;
+                                case ("-GAPFUL"):minuses[3] = true;
+                                    break;
+                                case ("-SPY"):minuses[4] = true;
+                                    break;
+                                case ("-SQUARE"):minuses[5] = true;
+                                    break;
+                                case ("-SUNNY"):minuses[6] = true;
+                                    break;
+                                case ("-JUMPING"):minuses[7] = true;
+                                    break;
+                                case ("-HAPPY"):minuses[8] = true;
+                                    break;
+                                case ("-SAD"):minuses[9] = true;
+                                    break;
+                                case ("-EVEN"):minuses[10] = true;
+                                    break;
+                                case ("-ODD"):minuses[11] = true;
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        boolean mutual = false;
+                        int j;
+                        for (j = 0; j < 12; j++){
+                            if (requests[j] && minuses[j]) {
+                                mutual = true;
+                                break;
+                            }
+                        }
+                        if (mutual) {
+                            System.out.println("The request contains mutually exclusive properties: [" + words[2] +"," + words[3] +"]");
+                            System.out.println("There are no numbers with these properties.");
+                        } else if (requests[10]&&requests[11]||requests[8]&&requests[9]||requests[5]&&requests[6]||requests[4]&&requests[1]||minuses[10]&&minuses[11]||minuses[8]&&minuses[9]||minuses[5]&&minuses[6]||minuses[4]&&minuses[1]){
+                            System.out.println("The request contains mutually exclusive properties: [" + words[2] +"," + words[3] +"]");
+                            System.out.println("There are no numbers with these properties.");
+                        }
+                        else {
+                            while (count < Long.parseLong(words[1])) {
+                                printstuff = true;
+                                theproperty.setproperties((long) b);
+
+                                for (int i = 0; i < requests.length; i++) {
+                                    printstuff = printstuff && (!requests[i] || theproperty.theproperties[i]) && (!minuses[i] || !theproperty.theproperties[i]);
+                                }
+
+                                if (printstuff) {
+                                    count++;
+                                    theproperty.printproperties((short) 2);
+                                }
+                                b++;
+                            }
+
+                        }
+                    }
+                }
+            }
+        } while (a!=0);
+    }
+}
